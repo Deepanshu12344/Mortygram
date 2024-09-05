@@ -2,12 +2,15 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from 'cors';
 import dotenv from 'dotenv';
-import path from path;
+import path from 'path';
 import mongoose from "mongoose";
 import multer from "multer";
 import helmet from 'helmet';
 import { fileURLToPath } from 'url';
 import morgan from "morgan";
+import {register} from './controllers/auth.js';
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/user.js";
 
 // CONFIGURATIONS
 
@@ -25,12 +28,24 @@ app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, 'public/assets')));
 
 // FILE STORAGE
-
-
-
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT,(request,response)=>{
-    console.log(`App running on port ${PORT}`)
+const storage = multer.diskStorage({
+    destination: function (req,file,cb){
+        cb(null,'public/assets');
+    },
+    filename : function(req,file,cb){
+        cb(null,file.originalname);
+    },
 });
+const upload = multer({storage});
+
+//ROUTES
+app.post("/auth/register", upload.single("picture"), register);
+
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+// MONGODB
+const PORT = process.env.PORT || 3000;
+mongoose.connect("mongodb://localhost:27017/mortygram")
+.then(()=>{
+    app.listen(PORT,()=>console.log(`Server Port: ${PORT}`));
+}).catch((error=>console.log(error)));
