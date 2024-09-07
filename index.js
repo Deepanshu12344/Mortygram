@@ -11,6 +11,9 @@ import morgan from "morgan";
 import {register} from './controllers/auth.js';
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/user.js";
+import postRoutes from "./routes/posts.js";
+import { verifyToken } from "./middleware/auth.js";
+import { createPost } from "./controllers/posts.js";
 
 // CONFIGURATIONS
 
@@ -40,9 +43,11 @@ const upload = multer({storage});
 
 //ROUTES
 app.post("/auth/register", upload.single("picture"), register);
+app.post("/posts", upload.single("picture"), verifyToken, createPost);
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
+app.use("/posts", postRoutes);
 // MONGODB
 const PORT = process.env.PORT || 3000;
 mongoose.connect("mongodb://localhost:27017/mortygram")
