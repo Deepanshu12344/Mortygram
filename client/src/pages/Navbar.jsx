@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import FlexBetween from '../components/FlexBetween.js'
 import { useDispatch, useSelector } from 'react-redux';
-import { setMode, setLogout } from 'state'
+import { setMode, setLogout } from '../state/index.js'
 import {
   Search,
   Message,
@@ -10,7 +10,7 @@ import {
   LightMode,
   Notifications,
   Help,
-  Mehu,
+  Menu,
   Close
 } from '@mui/icons-material'
 import {
@@ -40,7 +40,8 @@ export const Navbar = () => {
   const primaryLight = theme.palette.primary.light;
   const alt = theme.palette.background.alt;
 
-  const fullName = `${user.firstname} ${user.lastname}`
+  const fullName = `Deepanshu`
+  // const fullName = `${user.firstname} ${user.lastname}`
 
   return <FlexBetween padding="1rem 6%" backgroundColor={alt}>
     <FlexBetween gap="1.75rem">
@@ -104,7 +105,7 @@ export const Navbar = () => {
                 }}
                 input={<InputBase />}
               >
-                <MenuItem vlaue={fullname}>
+                <MenuItem vlaue={fullName}>
                   <Typography>{fullName}</Typography>
                 </MenuItem>
                 <MenuItem onClick={()=>dispatch(setLogout())}>Log Out</MenuItem>
@@ -122,8 +123,60 @@ export const Navbar = () => {
 
       {/* mobile nav */}
       {!isNonMobileScreens && isMobileMenuToggle &&(
-        <Box>
-          
+        <Box
+          position="fixed"
+          right="0"
+          bottom="0"
+          height="100%"
+          zIndex="10"
+          maxWidth="500px"
+          minWidth="300px"
+          backgroundColor={background}
+        >
+
+          <Box display="flex" justifyContent="flex-end" p="1rem">
+            <IconButton
+              onClick={()=>setIsMobileMenuToggle(!isMobileMenuToggle)}
+            >
+              <Close />
+            </IconButton>
+          </Box>
+          <FlexBetween display="flex" flexDirection="column" justifyContent="center" alignItems="center" gap="2rem">
+            <IconButton onClick={()=>dispatch(setMode())} sx={{fontSize: "25px"}}>
+              {theme.palette.mode === "dark" ? (
+                <DarkMode sx={{fontSize: "25px"}}/>
+              ):(
+                <LightMode sx={{color: dark, fontSize: "25px"}}/>
+              ) }
+            </IconButton>
+            <Message sx={{color: dark, fontSize: "25px"}}/>
+            <Notifications sx={{color: dark, fontSize: "25px"}}/>
+            <Help sx={{color: dark, fontSize: "25px"}}/>
+            <FormControl variant='standard' value={fullName}>
+              <Select
+                value={fullName}
+                sx={{
+                  backgroundColor: neutralLight,
+                  width:"150px",
+                  borderRadius:"0.25rem",
+                  p: "0.25rem 1rem",
+                  "& .MuiSvgIcon-root" : {
+                    pr: "0.25rem",
+                    width: "3rem",
+                  },
+                  "& .MuiSelect-select:form":{
+                    backgroundColor: neutralLight,
+                  },
+                }}
+                input={<InputBase />}
+              >
+                <MenuItem vlaue={fullName}>
+                  <Typography>{fullName}</Typography>
+                </MenuItem>
+                <MenuItem onClick={()=>dispatch(setLogout())}>Log Out</MenuItem>
+              </Select>
+            </FormControl>
+          </ FlexBetween>
         </Box>
       )}
 
