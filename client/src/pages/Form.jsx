@@ -1,197 +1,216 @@
-import { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Box, TextField, Button, Typography, Avatar } from '@mui/material';
 import { useDispatch } from 'react-redux';
-import { setLogin } from '../state/index'; // Assuming this is for storing login state
-import Dropzone from 'react-dropzone'; // For picture upload
-import FlexBetween from '../components/FlexBetween'; // Assuming you have a custom FlexBetween component
+import { useNavigate } from 'react-router-dom';
+import { setLogin } from '../state';
 
-export const Form = () => {
-  const isNonMobile = useMediaQuery("(min-width:600px)");
-  const theme = useTheme();
-  const navigate = useNavigate();
+const Form = () => {
   const dispatch = useDispatch();
-
-  // State for Register Form
-  const [registerFormData, setRegisterFormData] = useState({
-    firstname: "",
-    lastname: "",
-    email: "",
-    password: "",
-    location: "",
-    occupation: "",
-    picture: ""
+  const navigate = useNavigate();
+  const [isRegister, setIsRegister] = useState(true);
+  const [formData, setFormData] = useState({
+    firstname: '',
+    lastname: '',
+    email: '',
+    password: '',
+    picturePath: '',
+    location: '',
+    occupation: '',
   });
+  
+  const [formErrors, setFormErrors] = useState({});
 
-  // State for Login Form
-  const [loginFormData, setLoginFormData] = useState({
-    email: "",
-    password: ""
-  });
-
-  // Handle input changes for Register Form
-  const handleRegisterInputChange = (e) => {
-    setRegisterFormData({ ...registerFormData, [e.target.name]: e.target.value });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Handle input changes for Login Form
-  const handleLoginInputChange = (e) => {
-    setLoginFormData({ ...loginFormData, [e.target.name]: e.target.value });
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, picturePath: e.target.files[0] });
   };
 
-  // Submit Register Form
-  const handleSubmitRegister = async (e) => {
-    e.preventDefault();
+  const validateForm = () => {
+    let errors = {};
+    if (isRegister) {
+      if (!formData.firstname || formData.firstname.length < 2 || formData.firstname.length > 50) {
+        errors.firstname = 'First name must be between 2 and 50 characters';
+      }
+      if (!formData.lastname || formData.lastname.length < 2 || formData.lastname.length > 50) {
+        errors.lastname = 'Last name must be between 2 and 50 characters';
+      }
+    }
+    if (!formData.email || formData.email.length > 50) {
+      errors.email = 'Email is required and must be under 50 characters';
+    }
+    if (!formData.password || formData.password.length < 5) {
+      errors.password = 'Password must be at least 5 characters long';
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleRegister = async () => {
+    const data = new FormData();
+    for (const key in formData) {
+      if (key === 'picturePath' && formData.picturePath) {
+        data.append("picture", formData.picturePath); // Note the field name as "picture"
+      } else {
+        data.append(key, formData[key]);
+      }
+    }
+
     try {
-      const response = await fetch(`http://localhost:3000/auth/register`, {
-        method: "POST",
-        headers: {
-          'Content-type': "application/json",
-        },
-        body: JSON.stringify(registerFormData)
+      const response = await fetch('http://localhost:3000/auth/register', {
+        method: 'POST',
+        body: data,  
       });
+
       const result = await response.json();
-      console.log(result);
-      // Handle successful registration, maybe navigate to login
+      console.log("Registration successful:", result);
+      setIsRegister(false); // Switch to login after successful registration
     } catch (error) {
-      console.error(error);
+      console.error("Error during registration:", error);
     }
   };
 
-  // Submit Login Form
-  const handleSubmitLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/auth/login`, {
+      const response = await fetch('http://localhost:3000/auth/login', {
         method: "POST",
         headers: {
-          "Content-type": "application/json"
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(loginFormData)
+        body: JSON.stringify({ email: formData.email, password: formData.password })
       });
-      const result = await response.json();
-      console.log(result);
-      dispatch(setLogin(result)); // Store login state in Redux
-      navigate("/dashboard"); // Navigate to dashboard on successful login
+      
+      const loggedIn = await response.json();
+      if (loggedIn) {
+        dispatch(
+          setLogin({
+            user: loggedIn.user,
+            token: loggedIn.token
+          })
+        );
+        navigate("/home");
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error during login:", error);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      isRegister ? handleRegister() : handleLogin();
     }
   };
 
   return (
-    <Box m="2rem">
-      <Typography variant="h4" gutterBottom>
-        Register
-      </Typography>
-      <Form onSubmit={handleSubmitRegister}>
-        <TextField
-          label="First Name"
-          name="firstname"
-          value={registerFormData.firstname}
-          onChange={handleRegisterInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Last Name"
-          name="lastname"
-          value={registerFormData.lastname}
-          onChange={handleRegisterInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Email"
-          name="email"
-          value={registerFormData.email}
-          onChange={handleRegisterInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Password"
-          name="password"
-          type="password"
-          value={registerFormData.password}
-          onChange={handleRegisterInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Location"
-          name="location"
-          value={registerFormData.location}
-          onChange={handleRegisterInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Occupation"
-          name="occupation"
-          value={registerFormData.occupation}
-          onChange={handleRegisterInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <Dropzone
-          onDrop={(acceptedFiles) => setRegisterFormData({ ...registerFormData, picture: acceptedFiles[0] })}
-        >
-          {({ getRootProps, getInputProps }) => (
-            <Box {...getRootProps()} border="1px dashed" p="1rem" textAlign="center">
-              <input {...getInputProps()} />
-              <Typography>Drop your picture here, or click to select</Typography>
-            </Box>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        maxWidth: '400px',
+        margin: 'auto',
+        padding: '1rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+      }}
+    >
+      <Typography variant="h4" align="center">{isRegister ? 'Register' : 'Login'}</Typography>
+      
+      {isRegister && (
+        <>
+          <TextField
+            label="First Name"
+            name="firstname"
+            value={formData.firstname}
+            onChange={handleInputChange}
+            error={!!formErrors.firstname}
+            helperText={formErrors.firstname}
+            fullWidth
+            required
+          />
+          <TextField
+            label="Last Name"
+            name="lastname"
+            value={formData.lastname}
+            onChange={handleInputChange}
+            error={!!formErrors.lastname}
+            helperText={formErrors.lastname}
+            fullWidth
+            required
+          />
+          <Button variant="outlined" component="label" fullWidth>
+            Upload Profile Picture
+            <input type="file" hidden accept="image/*" onChange={handleFileChange} />
+          </Button>
+          {formData.picturePath && (
+            <Avatar src={URL.createObjectURL(formData.picturePath)} sx={{ width: 56, height: 56, margin: 'auto' }} />
           )}
-        </Dropzone>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{ mt: "1rem" }}
-        >
-          Register
-        </Button>
-      </Form>
-
-      <Typography variant="h4" gutterBottom sx={{ mt: "2rem" }}>
-        Login
+          <TextField
+            label="Location"
+            name="location"
+            value={formData.location}
+            onChange={handleInputChange}
+            fullWidth
+          />
+          <TextField
+            label="Occupation"
+            name="occupation"
+            value={formData.occupation}
+            onChange={handleInputChange}
+            fullWidth
+          />
+        </>
+      )}
+      
+      <TextField
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleInputChange}
+        error={!!formErrors.email}
+        helperText={formErrors.email}
+        fullWidth
+        required
+      />
+      
+      <TextField
+        label="Password"
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleInputChange}
+        error={!!formErrors.password}
+        helperText={formErrors.password}
+        fullWidth
+        required
+      />
+      
+      <Button type="submit" variant="contained" color="primary" fullWidth>
+        {isRegister ? 'Register' : 'Login'}
+      </Button>
+      
+      <Typography align="center" sx={{ mt: 2, cursor: 'pointer', color: 'primary.main' }} onClick={() => {
+        setIsRegister(!isRegister);
+        setFormErrors({});
+        setFormData({
+          firstname: '',
+          lastname: '',
+          email: '',
+          password: '',
+          picturePath: null,
+          location: '',
+          occupation: '',
+        });
+      }}>
+        {isRegister ? 'Already have an account? Login' : "Don't have an account? Register"}
       </Typography>
-      <Form onSubmit={handleSubmitLogin}>
-        <TextField
-          label="Email"
-          name="email"
-          value={loginFormData.email}
-          onChange={handleLoginInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Password"
-          name="password"
-          type="password"
-          value={loginFormData.password}
-          onChange={handleLoginInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{ mt: "1rem" }}
-        >
-          Login
-        </Button>
-      </Form>
     </Box>
   );
 };
+
+export default Form;

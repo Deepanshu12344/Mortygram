@@ -48,6 +48,7 @@ app.post("/posts", upload.single("picture"), verifyToken, createPost);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
+
 // MONGODB
 const PORT = process.env.PORT || 3000;
 mongoose.connect("mongodb://localhost:27017/mortygram")
