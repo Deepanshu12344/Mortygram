@@ -4,6 +4,7 @@ import { Navbar } from './Navbar';
 import UserWidget from './widgets/UserWidget';
 import FriendWidget from './widgets/FriendWidget';
 import PostWidget from './widgets/PostWidget';
+import MyPostWidget from './widgets/MyPostWidget';
 import { useSelector } from 'react-redux';
 
 export const HomePage = () => {
@@ -30,6 +31,7 @@ export const HomePage = () => {
           width="90%" 
         >
           {/* Middle Column for Post Widget */}
+          <MyPostWidget />
           <PostWidget />
         </Box>
       </Box>

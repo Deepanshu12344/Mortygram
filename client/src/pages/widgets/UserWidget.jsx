@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   ManageAccountsOutlined,
   EditOutlined,
@@ -7,7 +7,6 @@ import {
 } from '@mui/icons-material';
 import { Box, Typography, Divider, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import rick from './rick.png';
 
 import UserImage from '../../components/UserImage';
 import FlexBetween from '../../components/FlexBetween';
@@ -15,7 +14,7 @@ import WidgetWrapper from '../../components/WidgetWrapper';
 import { useSelector } from 'react-redux';
 
 const UserSection = () => {
-  const user = useSelector((state)=>state.user);
+  const {user} = useSelector((state)=>state);
   const theme = useTheme();
   const navigate = useNavigate();
 
@@ -37,10 +36,10 @@ const UserSection = () => {
       {/* Top Section */}
       <FlexBetween>
         <FlexBetween gap="1rem">
-          <UserImage image={user.picturePath} size="60px" />
+          <UserImage onClick={()=>navigate(`/profile/${user._id}`)} image={user.picturePath} size="60px" />
           <Box>
             <Typography variant="h6" fontWeight="500" color={theme.palette.text.primary}>
-              {user.firstname}{user.lastname}
+              {user.firstname} {user.lastname}
             </Typography>
             <Typography color={theme.palette.text.secondary} fontSize="0.85rem">
               {user.occupation}
