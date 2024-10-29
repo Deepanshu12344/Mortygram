@@ -64,7 +64,7 @@ const PostWidget = ({userId,isProfile = false}) => {
     <Box
       sx={{
         width: { xs: '90%', sm: '600px' },
-        maxWidth: '600px',
+        maxWidth: '450px',
         marginTop: '1rem',
         marginLeft: '40px',
       }}

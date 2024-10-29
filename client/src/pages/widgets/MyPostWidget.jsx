@@ -28,7 +28,7 @@ const MyPostWidget = ({ picturePath }) => {
     const [isImage, setIsImage] = useState(false);
     const [image, setImage] = useState(null);
     const [post, setPost] = useState("");
-    const { palette } = useTheme();
+    const theme = useTheme();
     const { _id } = useSelector((state) => state.user);
     const token = useSelector((state) => state.token);
 
@@ -36,14 +36,12 @@ const MyPostWidget = ({ picturePath }) => {
         const formData = new FormData();
         formData.append("userId", _id);
         formData.append("description", post);
-        // formData.append("firstName", firstName); // Add first name
-        // formData.append("lastName", lastName);   // Add last name
-    
+
         if (image) {
             formData.append("picture", image);
             formData.append("picturePath", image.name);
         }
-    
+
         const response = await fetch(`http://localhost:3000/posts`, {
             method: "POST",
             headers: {
@@ -51,16 +49,20 @@ const MyPostWidget = ({ picturePath }) => {
             },
             body: formData,
         });
-    
+
         const posts = await response.json();
         dispatch(setPosts({ posts }));
         setImage(null);
         setPost("");
     };
-    
 
     return (
-        <WidgetWrapper sx={{ backgroundColor: "#333", color: "#fff" }}>
+        <WidgetWrapper
+            sx={{
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+            }}
+        >
             <Box display="flex" alignItems="center" mb="1rem">
                 <UserImage image={picturePath} size="50px" />
                 <InputBase
@@ -69,10 +71,10 @@ const MyPostWidget = ({ picturePath }) => {
                     onChange={(e) => setPost(e.target.value)}
                     sx={{
                         flex: 1,
-                        backgroundColor: "#444",
+                        backgroundColor: theme.palette.background.default,
                         borderRadius: "20px",
                         padding: "0.5rem 1rem",
-                        color: "#fff",
+                        color: theme.palette.text.primary,
                         ml: "1rem",
                     }}
                 />
@@ -80,7 +82,7 @@ const MyPostWidget = ({ picturePath }) => {
 
             {isImage && (
                 <Box
-                    border="1px solid #555"
+                    border={`1px solid ${theme.palette.divider}`}
                     borderRadius="8px"
                     p="0.5rem"
                     mb="1rem"
@@ -88,18 +90,16 @@ const MyPostWidget = ({ picturePath }) => {
                     justifyContent="space-between"
                     alignItems="center"
                 >
-                    <Dropzone
-                        onDrop={(acceptedFiles) => setImage(acceptedFiles[0])}
-                    >
+                    <Dropzone onDrop={(acceptedFiles) => setImage(acceptedFiles[0])}>
                         {({ getRootProps, getInputProps }) => (
-                            <Box {...getRootProps()} p="1rem" sx={{ cursor: 'pointer' }}>
+                            <Box {...getRootProps()} p="1rem" sx={{ cursor: "pointer" }}>
                                 <input {...getInputProps()} />
                                 {!image ? (
-                                    <Typography color="#aaa">
+                                    <Typography color={theme.palette.text.secondary}>
                                         Drag & drop or click to select an image
                                     </Typography>
                                 ) : (
-                                    <Typography color="#aaa">
+                                    <Typography color={theme.palette.text.secondary}>
                                         {image.name}
                                     </Typography>
                                 )}
@@ -114,21 +114,21 @@ const MyPostWidget = ({ picturePath }) => {
                 </Box>
             )}
 
-            <Divider sx={{ borderColor: "#555", my: "1rem" }} />
+            <Divider sx={{ borderColor: theme.palette.divider, my: "1rem" }} />
 
             <FlexBetween>
                 <Box display="flex" gap="1rem">
                     <IconButton onClick={() => setIsImage(!isImage)}>
-                        <ImageOutlined sx={{ color: "#aaa" }} />
+                        <ImageOutlined sx={{ color: theme.palette.text.secondary }} />
                     </IconButton>
                     <IconButton>
-                        <GifBoxOutlined sx={{ color: "#aaa" }} />
+                        <GifBoxOutlined sx={{ color: theme.palette.text.secondary }} />
                     </IconButton>
                     <IconButton>
-                        <AttachFileOutlined sx={{ color: "#aaa" }} />
+                        <AttachFileOutlined sx={{ color: theme.palette.text.secondary }} />
                     </IconButton>
                     <IconButton>
-                        <MicOutlined sx={{ color: "#aaa" }} />
+                        <MicOutlined sx={{ color: theme.palette.text.secondary }} />
                     </IconButton>
                 </Box>
 

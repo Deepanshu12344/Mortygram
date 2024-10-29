@@ -24,17 +24,6 @@ export const createPost = async(request,response)=>{
         console.log(error);
     }
 };
-// export const createPost = async (req, res) => {
-//     try {
-//         const { userId, description, firstName, lastName, picturePath } = req.body;
-//         const newPost = new Post({ userId, description, firstName, lastName, picturePath });
-//         await newPost.save();
-//         res.status(201).json(newPost);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(400).json({ error: error.message });
-//     }
-// };
 export const getFeedPosts = async(request,response)=>{
     try {
         const post = await Post.find();
