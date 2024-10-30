@@ -57,6 +57,14 @@ const MyPostWidget = ({ picturePath }) => {
     };
 
     return (
+        <Box
+      sx={{
+        width: { xs: '90%', sm: '600px' },
+        maxWidth: '450px',
+        marginTop: '1rem',
+        marginLeft: '40px',
+      }}
+    >
         <WidgetWrapper
             sx={{
                 backgroundColor: theme.palette.background.paper,
@@ -142,6 +150,7 @@ const MyPostWidget = ({ picturePath }) => {
                 </Button>
             </FlexBetween>
         </WidgetWrapper>
+        </Box>
     );
 };
 

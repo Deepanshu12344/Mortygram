@@ -40,7 +40,7 @@ const PostWidget = ({userId,isProfile = false}) => {
 
   useEffect(() => {
     if(isProfile){
-      getUserPosts();
+      getUserPosts();       
     }else{
       getPosts();
     }
