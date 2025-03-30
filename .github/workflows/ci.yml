@@ -20,5 +20,5 @@ jobs:
     - name: Build the Docker image
       run: docker build -t deepanshu091224/mortygram:${{github.sha}} .
     - name: push docker image
-      run: push docker deepanshu091224/mortygram:${{github.sha}}
+      run: docker push deepanshu091224/mortygram:${{github.sha}}
     
