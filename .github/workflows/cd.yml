@@ -1,0 +1,23 @@
+name: CD PIPELINE
+
+on:
+  workflow_run:
+    workflows: [CI PIPELINE]
+    types:
+       - completed
+    
+
+jobs:
+
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - name: pull docker image
+      run : sudo docker pull deepanshu091224/mortygram:${{github.sha}} 
+    - name: delete old docker container
+      run: docker rm -f mortygram-container || true
+    - name: run docker container
+      run: docker run -d -p 7070:7070 --name mortygram-container deepanshu091224/mortygram:${{github.sha}} 
+    
