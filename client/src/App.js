@@ -7,6 +7,7 @@ import { useSelector }from 'react-redux';
 import {themeSettings} from './theme.js'
 import {createTheme} from '@mui/material/styles';
 import { CssBaseline,ThemeProvider } from '@mui/material';
+import UserDetailWidget from './pages/widgets/UserDetailWidget.jsx';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           <Route path='/' element={<LoginPage />} />
           <Route path='/home' element={isAuth ? <HomePage /> : <Navigate to="/"/>} />
+          <Route path='/home/:id' element={<UserDetailWidget />} />
           <Route path='/profile/:id' element={isAuth ? <ProfilePage /> : <Navigate to="/"/>} />
         </Routes>
       </ThemeProvider>
