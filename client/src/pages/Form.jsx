@@ -72,7 +72,7 @@ const Form = () => {
       console.error("Error during registration:", error);
     }
   };
-
+//dummy
   const handleLogin = async () => {
     try {
       const response = await fetch('http://localhost:3000/auth/login', {
