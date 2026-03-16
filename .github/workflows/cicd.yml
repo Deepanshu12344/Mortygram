@@ -2,7 +2,7 @@ name: Secure CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
 
@@ -17,35 +17,42 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      - name: Install project dependencies
+      - name: Install Scanner Dependencies
         run: |
           pip install -r capci_cd/requirements.txt
 
-      - name: Run AI Security Scanner
+      - name: Run Secure CI/CD Scan
         run: |
-          python capci_cd/main.py .
+          echo "🔍 Starting Secure CI/CD Scan..."
+          echo "Scanning repository: $GITHUB_REPOSITORY"
 
-      # If scanner exits with non-zero code pipeline stops
-      - name: Fail pipeline if vulnerabilities found
-        run: |
-          if [ -f security_fail.flag ]; then
-            echo "🚨 SECURITY RISKS DETECTED. STOPPING PIPELINE."
-            exit 1
-          fi
+          python capci_cd/main.py \
+            --target-path . \
+            --risk-threshold 80 \
+            --fail-on-critical true
+
+      - name: Upload Scan Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report
+          path: |
+            .run-logs/
+            backend/uploads/scan-reports/
 
 
   build_and_push:
-    name: Build & Push Docker Image
+    name: Build and Push Docker Image
     needs: security_scan
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Docker login
+      - name: Login to DockerHub
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -68,16 +75,17 @@ jobs:
 
     steps:
 
-      - name: Pull latest Docker image
+      - name: Pull Docker Image
         run: |
           sudo docker pull deepanshu091224/mortygram:${{ github.sha }}
 
-      - name: Remove old container
+      - name: Remove Old Container
         run: |
           docker rm -f mortygram-container || true
 
-      - name: Run new container
+      - name: Run New Container
         run: |
-          docker run -d -p 7070:7070 \
+          docker run -d \
+          -p 7070:7070 \
           --name mortygram-container \
           deepanshu091224/mortygram:${{ github.sha }}
