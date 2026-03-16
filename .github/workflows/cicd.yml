@@ -1,0 +1,83 @@
+name: Secure CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  security_scan:
+    name: Run Secure CI/CD Scanner
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install project dependencies
+        run: |
+          pip install -r capci_cd/requirements.txt
+
+      - name: Run AI Security Scanner
+        run: |
+          python capci_cd/main.py .
+
+      # If scanner exits with non-zero code pipeline stops
+      - name: Fail pipeline if vulnerabilities found
+        run: |
+          if [ -f security_fail.flag ]; then
+            echo "🚨 SECURITY RISKS DETECTED. STOPPING PIPELINE."
+            exit 1
+          fi
+
+
+  build_and_push:
+    name: Build & Push Docker Image
+    needs: security_scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Docker login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+      - name: Build Docker Image
+        run: |
+          docker build -t deepanshu091224/mortygram:${{ github.sha }} .
+
+      - name: Push Docker Image
+        run: |
+          docker push deepanshu091224/mortygram:${{ github.sha }}
+
+
+  deploy:
+    name: Deploy Container
+    needs: build_and_push
+    runs-on: self-hosted
+
+    steps:
+
+      - name: Pull latest Docker image
+        run: |
+          sudo docker pull deepanshu091224/mortygram:${{ github.sha }}
+
+      - name: Remove old container
+        run: |
+          docker rm -f mortygram-container || true
+
+      - name: Run new container
+        run: |
+          docker run -d -p 7070:7070 \
+          --name mortygram-container \
+          deepanshu091224/mortygram:${{ github.sha }}
