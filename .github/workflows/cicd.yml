@@ -11,35 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Run Secure CI/CD Scanner
+        uses: Deepanshu12344/secure_cicd_pipeline@v1
         with:
           python-version: "3.11"
-
-      - name: Install Scanner Dependencies
-        run: |
-          pip install -r capci_cd/requirements.txt
-
-      - name: Run Secure CI/CD Scan
-        run: |
-          echo "🔍 Starting Secure CI/CD Scan..."
-          echo "Scanning repository: $GITHUB_REPOSITORY"
-
-          python capci_cd/main.py \
-            --target-path . \
-            --risk-threshold 80 \
-            --fail-on-critical true
-
-      - name: Upload Scan Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-scan-report
-          path: |
-            .run-logs/
-            backend/uploads/scan-reports/
+          target-path: "."
+          risk-threshold: "80"
+          fail-on-critical: "true"
 
 
   build_and_push:
@@ -49,7 +31,7 @@ jobs:
 
     steps:
 
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Login to DockerHub
@@ -75,7 +57,7 @@ jobs:
 
     steps:
 
-      - name: Pull Docker Image
+      - name: Pull Latest Docker Image
         run: |
           sudo docker pull deepanshu091224/mortygram:${{ github.sha }}
 
