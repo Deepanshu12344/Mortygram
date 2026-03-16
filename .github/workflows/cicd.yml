@@ -23,6 +23,17 @@ jobs:
           risk-threshold: "80"
           fail-on-critical: "true"
 
+      - name: Send Scan Results to Dashboard
+        run: |
+          echo "Uploading scan report to dashboard..."
+
+          curl -X POST ${{ secrets.DASHBOARD_URL }} \
+            -H "Authorization: Bearer ${{ secrets.CI_INGEST_API_KEY }}" \
+            -F "projectId=${{ secrets.DASHBOARD_PROJECT_ID }}" \
+            -F "repository=${{ github.repository }}" \
+            -F "commit=${{ github.sha }}" \
+            -F "report=@.run-logs/scan-report.json"
+
 
   build_and_push:
     name: Build and Push Docker Image
