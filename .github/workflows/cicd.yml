@@ -7,32 +7,15 @@ on:
 jobs:
 
   security_scan:
-    name: Run Secure CI/CD Scanner
+    name: Security Scan
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Run Secure CI/CD Scanner
         uses: Deepanshu12344/secure_cicd_pipeline@v1
-        with:
-          python-version: "3.11"
-          target-path: "."
-          risk-threshold: "80"
-          fail-on-critical: "true"
-
-      - name: Send Scan Results to Dashboard
-        run: |
-          echo "Uploading scan report to dashboard..."
-
-          curl -X POST ${{ secrets.DASHBOARD_URL }} \
-            -H "Authorization: Bearer ${{ secrets.CI_INGEST_API_KEY }}" \
-            -F "projectId=${{ secrets.DASHBOARD_PROJECT_ID }}" \
-            -F "repository=${{ github.repository }}" \
-            -F "commit=${{ github.sha }}" \
-            -F "report=@.run-logs/scan-report.json"
 
 
   build_and_push:
@@ -41,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -67,7 +49,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-
       - name: Pull Latest Docker Image
         run: |
           sudo docker pull deepanshu091224/mortygram:${{ github.sha }}
