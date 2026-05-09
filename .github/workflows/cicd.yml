@@ -1,5 +1,5 @@
 name: mortygram CI/CD Pipeline
-#njijjo
+
 on:
   push:
     branches: ["main"]
